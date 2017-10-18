@@ -32,6 +32,7 @@ public class MainActivity extends Activity {
     Cursor cursor;
     int counter;
     private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS =1;
+    private static final int MY_PERMISSIONS_REQUEST_CALL_PHONE =1;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,34 +65,59 @@ public class MainActivity extends Activity {
                 // result of the request.
             }
         }
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.CALL_PHONE)
+                != PackageManager.PERMISSION_GRANTED) {
 
-        pDialog = new ProgressDialog(this);
-        pDialog.setMessage("Reading contacts...");
-        pDialog.setCancelable(false);
-        pDialog.show();
-        mListView = (ListView) findViewById(R.id.list);
-        updateBarHandler =new Handler();
-        // Since reading contacts takes more time, let's run it on a separate thread.
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                getContacts();
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.CALL_PHONE)) {
+
+                // Show an expanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+            } else {
+
+                // No explanation needed, we can request the permission.
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.CALL_PHONE},
+                        MY_PERMISSIONS_REQUEST_CALL_PHONE);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
             }
-        }).start();
-        // Set onclicklistener to the list item.
-        mListView.setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view,
-                                    int position, long id) {
-                //TODO Do whatever you want with the list data
-                Toast.makeText(getApplicationContext(), "item clicked : \n"+contactList.get(position), Toast.LENGTH_SHORT).show();
-                String phone;
-                Log.d("CONTACT", contactList.get(position));
-                Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + contactList.get(position)));
-                startActivity(intent);
-            }
-        });
-    }
+        }
+            pDialog = new ProgressDialog(this);
+            pDialog.setMessage("Reading contacts...");
+            pDialog.setCancelable(false);
+            pDialog.show();
+            mListView = (ListView) findViewById(R.id.list);
+            updateBarHandler = new Handler();
+            // Since reading contacts takes more time, let's run it on a separate thread.
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    getContacts();
+                }
+            }).start();
+            // Set onclicklistener to the list item.
+            mListView.setOnItemClickListener(new OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view,
+                                        int position, long id) {
+                    //TODO Do whatever you want with the list data
+                    Toast.makeText(getApplicationContext(), "item clicked : \n" + contactList.get(position), Toast.LENGTH_SHORT).show();
+                    String phone;
+                    Log.d("CONTACT", contactList.get(position));
+                    Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + contactList.get(position)));
+                    startActivity(intent);
+                }
+            });
+        }
+
 
     public void getContacts() {
         contactList = new ArrayList<String>();
